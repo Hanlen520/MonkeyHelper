@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MonkeyHelper</string>
+    <string name="action_reload">重新加载</string>
+    <string name="action_edit">编辑</string>
+    <string name="action_share">分享</string>
+    <string name="title_activity_blacklist">黑名单</string>
+    <string name="to_blacklist">Activity 黑名单</string>
+    <string name="action_settings">设置</string>
+
+</resources>
