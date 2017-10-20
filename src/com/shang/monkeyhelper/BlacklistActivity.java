@@ -35,7 +35,6 @@ public class BlacklistActivity extends Activity {
 		listview_blacklist.setAdapter(adapter);
 		load_blacklist();
 		show_blacklist();
-		System.out.println();
 	}
 
 	@Override
