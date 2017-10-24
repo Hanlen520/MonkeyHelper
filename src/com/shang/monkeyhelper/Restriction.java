@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.view.MotionEvent;
 import android.view.View;
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -29,10 +29,10 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 	public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable {
 		// TODO Auto-generated method stub
 		if (!resparam.packageName.equals("com.android.systemui")) {
-			XposedBridge.log("Find com.android.systemui");
-		} else {
 			XposedBridge.log("Cannot find com.android.systemui");
-			resparam.res.hookLayout("com.android.systemui", "layout", "status_bar", new XC_LayoutInflated() {
+		} else {
+			XposedBridge.log("Find com.android.systemui");
+/*			resparam.res.hookLayout("com.android.systemui", "layout", "status_bar", new XC_LayoutInflated() {
 
 				@Override
 				public void handleLayoutInflated(LayoutInflatedParam liparam) throws Throwable {
@@ -65,10 +65,17 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 						}
 					});
 				}
-			});
+			});*/
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.robv.android.xposed.IXposedHookLoadPackage#handleLoadPackage(de.robv.
+	 * android.xposed.callbacks.XC_LoadPackage.LoadPackageParam)
+	 */
 	@Override
 	public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 		// TODO Auto-generated method stub
@@ -78,8 +85,8 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 		if (XposedHelpers.findClassIfExists("android.app.Instrumentation", lpparam.classLoader) == null) {
 			XposedBridge.log("android.app.Instrumentation cannot be found!");
 		} else {
-			XposedBridge.log("android.app.Instrumentation is found!");
-			final XSharedPreferences xSharedPreferences = new XSharedPreferences("com.shang.monkeyhelper",
+//			XposedBridge.log("android.app.Instrumentation is found!");
+			/*final XSharedPreferences xSharedPreferences = new XSharedPreferences("com.shang.monkeyhelper",
 					SPUtils.SPFILE);
 			xSharedPreferences.reload(); // 在包重新加载时会重新加载偏好设置，因此对于统一应用需要停止掉才能重新加载偏好设置（这是合理的）
 			XposedHelpers.findAndHookMethod("android.app.Instrumentation", lpparam.classLoader, "execStartActivity",
@@ -101,7 +108,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 							}
 							super.beforeHookedMethod(param);
 						}
-					});
+					});*/
 		}
 
 		/**
@@ -111,7 +118,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			XposedBridge.log("com.shang.monkeyhelper.MainActivity cannot be found!");
 		} else {
 			XposedBridge.log("com.shang.monkeyhelper.MainActivity is found!");
-			XposedHelpers.findAndHookMethod("com.shang.monkeyhelper.MainActivity", lpparam.classLoader, "special",
+			/*XposedHelpers.findAndHookMethod("com.shang.monkeyhelper.MainActivity", lpparam.classLoader, "special",
 					Object.class, boolean.class, new XC_MethodHook() {
 						@Override
 						protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
@@ -119,7 +126,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 							param.args[0] = lpparam; // 可以回传对象至应用空间
 							super.beforeHookedMethod(param);
 						}
-					});
+					});*/
 		}
 
 		/**
@@ -129,7 +136,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			XposedBridge.log("android.app.StatusBarManager cannot be found!");
 		} else {
 			XposedBridge.log("android.app.StatusBarManager is found!");
-			XposedHelpers.findAndHookMethod("android.app.StatusBarManager", lpparam.classLoader, "disable", int.class,
+/*			XposedHelpers.findAndHookMethod("android.app.StatusBarManager", lpparam.classLoader, "disable", int.class,
 					new XC_MethodHook() {
 						@Override
 						protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -171,7 +178,97 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 								super.beforeHookedMethod(param);
 							}
 						});
-			}
+			}*/
+		}
+
+		/**
+		 * hook leakcanary展示页面
+		 */
+		if (XposedHelpers.findClassIfExists("android.app.ApplicationPackageManager", lpparam.classLoader) == null) {
+			XposedBridge.log("android.app.ApplicationPackageManager cannot be found!");
+		} else {
+			XposedBridge.log("android.app.ApplicationPackageManager is found!");
+			/*XposedHelpers.findAndHookMethod("android.app.ApplicationPackageManager", lpparam.classLoader,
+					"setComponentEnabledSetting", ComponentName.class, int.class, int.class, new XC_MethodHook() {
+						@Override
+						protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log("setComponentEnabledSetting() is invoked!");
+//							param.args[1] = 2;
+							super.beforeHookedMethod(param);
+						}
+					});*/
+		}
+		
+		if(XposedHelpers.findClassIfExists("com.squareup.leakcanary.internal.RequestStoragePermissionActivity", lpparam.classLoader) == null) {
+			XposedBridge.log("com.squareup.leakcanary.internal.RequestStoragePermissionActivity cannot be found!");
+		} else {
+			XposedBridge.log("com.squareup.leakcanary.internal.RequestStoragePermissionActivity is found!");
+		}
+		
+		/**
+		 * Activity生命周期
+		 */
+		if(XposedHelpers.findClassIfExists("android.app.Activity", lpparam.classLoader) == null) {
+			XposedBridge.log("android.app.Activity cannot be found!");
+		} else {
+			XposedBridge.log("android.app.Activity is found!");
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					// TODO Auto-generated method stub
+					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+					super.afterHookedMethod(param);
+				}
+			});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onStart", new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					// TODO Auto-generated method stub
+					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+					super.afterHookedMethod(param);
+				}
+			});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onResume", new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					// TODO Auto-generated method stub
+					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+					super.afterHookedMethod(param);
+				}
+			});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onPause", new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					// TODO Auto-generated method stub
+					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+					super.afterHookedMethod(param);
+				}
+			});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onStop", new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					// TODO Auto-generated method stub
+					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+					super.afterHookedMethod(param);
+				}
+			});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onRestart", new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					// TODO Auto-generated method stub
+					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+					super.afterHookedMethod(param);
+				}
+			});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onDestroy", new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					// TODO Auto-generated method stub
+					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+					super.afterHookedMethod(param);
+				}
+			});
 		}
 	}
 
