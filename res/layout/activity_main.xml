@@ -47,6 +47,19 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/activity_vertical_margin" />
 
+        <ToggleButton
+            android:id="@+id/change_floatview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:textAllCaps="false"
+            android:textOff="悬浮按钮已关闭"
+            android:textOn="悬浮按钮已开启" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/activity_vertical_margin" />
+
         <Button
             android:id="@+id/do_special_dis"
             android:layout_width="match_parent"
