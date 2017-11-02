@@ -22,7 +22,7 @@ public class FloatWindowManager {
 		int screenWidth = displayMetrics.widthPixels;
 		int screenHeight = displayMetrics.heightPixels;
 		if (floatView == null) {
-			floatView = (FloatView) View.inflate(context, R.layout.view_float, null).findViewById(R.id.view_float);
+			floatView = (FloatView) View.inflate(context, R.layout.view_float, null);
 			if (floatViewParams == null) {
 				floatViewParams = new LayoutParams();
 				floatViewParams.x = screenWidth / 2 - floatView.getViewWidth() / 2;
