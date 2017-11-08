@@ -22,12 +22,11 @@ public class FloatWindowManager {
 		int screenWidth = displayMetrics.widthPixels;
 		int screenHeight = displayMetrics.heightPixels;
 		if (floatView == null) {
-			floatView = new FloatView(context);
+			floatView = FloatView.getInstance(context);
 			if (floatViewParams == null) {
 				floatViewParams = new LayoutParams();
-				int width = floatView.getViewWidth();
-				floatViewParams.x = screenWidth / 2 - floatView.getViewWidth() / 2;
-				floatViewParams.y = screenHeight / 2 - floatView.getViewHeight() / 2;
+				floatViewParams.x = screenWidth * 4 / 5;
+				floatViewParams.y = screenHeight * 4 / 5;
 				floatViewParams.type = LayoutParams.TYPE_TOAST;
 				floatViewParams.format = PixelFormat.RGBA_8888;
 				floatViewParams.gravity = Gravity.START | Gravity.TOP;

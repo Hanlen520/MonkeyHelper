@@ -6,14 +6,14 @@ import android.os.IBinder;
 import android.util.Log;
 
 public class FloatWindowService extends Service {
-	
+
 	@Override
 	public void onCreate() {
 		// TODO Auto-generated method stub
-		if(Constant.DEBUG) {
+		if (Constant.DEBUG) {
 			Log.i(FloatWindowService.class.getName(), "conCreate() is invoked!");
 		}
-		FloatWindowManager.createFloatView(getApplicationContext());
+		FloatWindowManager.createFloatView(this); // 使用this更好
 		super.onCreate();
 	}
 
@@ -26,7 +26,7 @@ public class FloatWindowService extends Service {
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
-		FloatWindowManager.removeFloatView(getApplicationContext());
+		FloatWindowManager.removeFloatView(this);
 		super.onDestroy();
 	}
 

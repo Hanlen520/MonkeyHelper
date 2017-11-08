@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -81,25 +82,38 @@ public class FloatView extends LinearLayout {
 		this.onUpListener = onUpListener;
 	}
 
-	public FloatView(Context context, AttributeSet attrs, int defStyleAttr) {
+	public static volatile FloatView floatView = null;
+
+	public static FloatView getInstance(Context context) {
+		if (floatView == null) {
+			synchronized (FloatView.class) {
+				if (floatView == null) {
+					floatView = new FloatView(context);
+				}
+			}
+		}
+		return floatView;
+	}
+
+	private FloatView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		// TODO Auto-generated constructor stub
 		windowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
 		// TypedArray typedArray = context.obtainStyledAttributes(attrs,
 		// R.styleable.FloatView); // 独立属性（声明在declare之外的）无法在此使用
 		// typedArray.recycle();
-		LayoutInflater.from(context).inflate(R.layout.view_float, this);
+		View.inflate(context, R.layout.view_float, this);
 		View view = findViewById(R.id.float_layout);
 		viewWidth = view.getLayoutParams().width;
 		viewHeight = view.getLayoutParams().height;
 	}
 
-	public FloatView(Context context, AttributeSet attrs) {
+	private FloatView(Context context, AttributeSet attrs) {
 		this(context, attrs, 0);
 		// TODO Auto-generated constructor stub
 	}
 
-	public FloatView(Context context) {
+	private FloatView(Context context) {
 		this(context, null);
 		// TODO Auto-generated constructor stub
 	}
@@ -127,6 +141,7 @@ public class FloatView extends LinearLayout {
 			// 如果手指离开屏幕时，xDownInScreen和xInScreen相等，且yDownInScreen和yInScreen相等，则视为触发了单击事件。
 			if (xDownInScreen == xInScreen && yDownInScreen == yInScreen) {
 				// openBigWindow(); // 使用回调
+				Log.i(FloatView.class.getName(), "ACTION_UP is done!");
 				if (onUpListener != null) {
 					onUpListener.onUp(FloatView.this); // 使用回调
 				}

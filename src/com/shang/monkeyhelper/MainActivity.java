@@ -1,9 +1,15 @@
 package com.shang.monkeyhelper;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Intent;
 import android.os.Bundle;
@@ -57,13 +63,13 @@ public class MainActivity extends Activity {
 			}
 		});
 		change_floatview = (ToggleButton) findViewById(R.id.change_floatview);
-		change_floatview.setChecked(isServiceRunning());
+		change_floatview.setChecked(isServiceRunning(FloatWindowService.class.getName()));
 		change_floatview.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				// TODO Auto-generated method stub
-				if(Constant.DEBUG) {
+				if (Constant.DEBUG) {
 					Log.i(MainActivity.class.getName(), "now the button is " + isChecked);
 				}
 				Intent intent = new Intent(MainActivity.this, FloatWindowService.class);
@@ -98,6 +104,8 @@ public class MainActivity extends Activity {
 		try {
 			Object service = getSystemService("statusbar");
 			Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
+			Log.i(MainActivity.class.getName(),
+					isProcessRunning("com.android.systemui") ? "statusbar exist" : "statusbar not exist");
 			Method expand = null;
 			if (service != null) {
 				if (currentApiVersion <= 16) {
@@ -110,6 +118,7 @@ public class MainActivity extends Activity {
 			}
 
 		} catch (Exception e) {
+			Log.i(MainActivity.class.getName(), "statusbarmanager not found");
 		}
 	}
 
@@ -129,13 +138,45 @@ public class MainActivity extends Activity {
 		// Toast.LENGTH_LONG).show();
 	}
 
-	private boolean isServiceRunning() {
+	private boolean isServiceRunning(String serviceName) {
 		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-			if (FloatWindowService.class.getName().equals(service.service.getClassName())) {
+			if (serviceName.equals(service.service.getClassName())) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * 判断进程是否正在运行
+	 * 
+	 * @param processName
+	 * @return
+	 */
+	private boolean isProcessRunning(String processName) {
+		String result = execCmd("ps -c |grep systemui");
+		System.out.println(result);
+		return false;
+	}
+
+	private String execCmd(String... string) {
+		// TODO Auto-generated method stub
+		StringBuilder result = new StringBuilder(); // 线程不安全
+		InputStreamReader inputStreamReader = null;
+		BufferedReader bufferedReader = null;
+		try {
+			Process process = Runtime.getRuntime().exec(string);
+			inputStreamReader = new InputStreamReader(process.getInputStream());
+			bufferedReader = new BufferedReader(inputStreamReader);
+			String temp = null;
+			while((temp = bufferedReader.readLine()) != null) {
+				result.append(temp).append("\n");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result.toString();
 	}
 }
