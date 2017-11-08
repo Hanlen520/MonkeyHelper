@@ -155,7 +155,7 @@ public class MainActivity extends Activity {
 	 * @return
 	 */
 	private boolean isProcessRunning(String processName) {
-		String result = execCmd("ps -c |grep systemui");
+		String result = execCmd("sh", "-c", "ps |grep com.android.systemui");
 		System.out.println(result);
 		return false;
 	}
