@@ -9,8 +9,10 @@ import java.lang.reflect.Method;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,13 +24,18 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+/**
+ * @author shang
+ *
+ */
 public class MainActivity extends Activity {
 
 	private Button to_blacklist;
 	private Button to_statusbar;
 	private Object binding = new Object();
 	private boolean expand_disabled;
-	private ToggleButton change_floatview;
+	private Button change_floatview;
+	private Button to_systemui;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,22 +69,60 @@ public class MainActivity extends Activity {
 				((Button) v).setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
 			}
 		});
-		change_floatview = (ToggleButton) findViewById(R.id.change_floatview);
-		change_floatview.setChecked(isServiceRunning(FloatWindowService.class.getName()));
-		change_floatview.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+		change_floatview = (Button) findViewById(R.id.change_floatview);
+		change_floatview.setText(isServiceRunning(FloatWindowService.class.getName()) ? "悬浮按钮已开启" : "悬浮按钮已关闭");
+		change_floatview.setOnClickListener(new View.OnClickListener() {
 
 			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				if (Constant.DEBUG) {
-					Log.i(MainActivity.class.getName(), "now the button is " + isChecked);
-				}
 				Intent intent = new Intent(MainActivity.this, FloatWindowService.class);
-				if (isChecked) {
-					startService(intent);
-				} else {
+				if (isServiceRunning(FloatWindowService.class.getName())) {
 					stopService(intent);
+					((Button) v).setText("悬浮按钮已关闭");
+				} else {
+					startService(intent);
+					((Button) v).setText("悬浮按钮已开启");
 				}
+			}
+
+		});
+
+		to_systemui = (Button) findViewById(R.id.to_systemui);
+		to_systemui.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this,
+						AlertDialog.THEME_DEVICE_DEFAULT_DARK);
+				builder.setIcon(R.drawable.ic_launcher).setTitle("Root方式启用/禁用通知栏")
+						.setMessage("您当前的systemui进程已" + (isProcessRunning("com.android.systemui") ? "启用" : "禁用")
+								+ "\n点击确定后将" + (isProcessRunning("com.android.systemui") ? "禁用" : "启用") + "通知栏"
+								+ "\n注意：该操作将会自动重启手机");
+				builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						if (isProcessRunning("com.android.systemui")) {
+							execCmd("su", "-c", "pm disable com.android.systemui");
+						} else {
+							execCmd("su", "-c", "pm enable com.android.systemui");
+						}
+						execCmd("su", "-c", "reboot");
+					}
+				});
+				builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+
+					}
+				});
+				builder.show().setCanceledOnTouchOutside(true);
 			}
 		});
 	}
@@ -99,13 +144,16 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	/**
+	 * 绑定相关onClick属性以启用
+	 * 
+	 * @param view
+	 */
 	public void expand_statusbar(View view) {
 		int currentApiVersion = android.os.Build.VERSION.SDK_INT;
 		try {
 			Object service = getSystemService("statusbar");
 			Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
-			Log.i(MainActivity.class.getName(),
-					isProcessRunning("com.android.systemui") ? "statusbar exist" : "statusbar not exist");
 			Method expand = null;
 			if (service != null) {
 				if (currentApiVersion <= 16) {
@@ -122,11 +170,21 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	/**
+	 * 绑定相关onClick属性以启用
+	 * 
+	 * @param view
+	 */
 	public void do_special_dis(View view) {
 		binding = getSystemService("statusbar");
 		special(binding, true);
 	}
 
+	/**
+	 * 绑定相关onClick属性以启用
+	 * 
+	 * @param view
+	 */
 	public void do_special_en(View view) {
 		binding = getSystemService("statusbar");
 		special(binding, false);
@@ -155,9 +213,8 @@ public class MainActivity extends Activity {
 	 * @return
 	 */
 	private boolean isProcessRunning(String processName) {
-		String result = execCmd("sh", "-c", "ps |grep com.android.systemui");
-		System.out.println(result);
-		return false;
+		String result = execCmd("sh", "-c", "ps |grep " + processName);
+		return result.contains(processName);
 	}
 
 	private String execCmd(String... string) {
@@ -170,7 +227,7 @@ public class MainActivity extends Activity {
 			inputStreamReader = new InputStreamReader(process.getInputStream());
 			bufferedReader = new BufferedReader(inputStreamReader);
 			String temp = null;
-			while((temp = bufferedReader.readLine()) != null) {
+			while ((temp = bufferedReader.readLine()) != null) {
 				result.append(temp).append("\n");
 			}
 		} catch (IOException e) {

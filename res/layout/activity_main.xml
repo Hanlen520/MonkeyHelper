@@ -28,7 +28,7 @@
             android:id="@+id/to_statusbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="StatusBar 状态"
+            android:text="通知栏已禁止下拉"
             android:textAllCaps="false" />
 
         <View
@@ -36,6 +36,29 @@
             android:layout_height="@dimen/activity_vertical_margin" />
 
         <Button
+            android:id="@+id/to_systemui"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Root方式启用/禁用通知栏"
+            android:textAllCaps="false" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/activity_vertical_margin" />
+
+        <Button
+            android:id="@+id/change_floatview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:text="悬浮按钮已关闭" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/activity_vertical_margin" />
+
+        <!--
+             <Button
             android:id="@+id/expand_statusbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,32 +70,17 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/activity_vertical_margin" />
 
-        <ToggleButton
-            android:id="@+id/change_floatview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checked="false"
-            android:textAllCaps="false"
-            android:textOff="悬浮按钮已关闭"
-            android:textOn="悬浮按钮已开启" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_vertical_margin" />
-
         <Button
             android:id="@+id/do_special_dis"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="do_special_dis"
             android:text="do special dis"
-            android:textAllCaps="false"
-            android:visibility="gone" />
+            android:textAllCaps="false" />
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_vertical_margin"
-            android:visibility="gone" />
+            android:layout_height="@dimen/activity_vertical_margin" />
 
         <Button
             android:id="@+id/do_special_en"
@@ -80,13 +88,12 @@
             android:layout_height="wrap_content"
             android:onClick="do_special_en"
             android:text="do special en"
-            android:textAllCaps="false"
-            android:visibility="gone" />
+            android:textAllCaps="false" />
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_vertical_margin"
-            android:visibility="gone" />
+            android:layout_height="@dimen/activity_vertical_margin" />
+        -->
     </LinearLayout>
 
 </ScrollView>
