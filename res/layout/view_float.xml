@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.shang.monkeyhelper.FloatView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/view_float"
-    android:layout_width="60dp"
-    android:layout_height="60dp"
-    android:src="@drawable/ic_launcher" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/float_layout"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:background="#88000000" >
 
-</com.shang.monkeyhelper.FloatView>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="+"
+        android:gravity="center"
+        android:textSize="32sp" />
+
+</LinearLayout>

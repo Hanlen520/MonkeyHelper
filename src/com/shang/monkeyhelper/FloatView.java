@@ -5,12 +5,13 @@ import java.lang.reflect.Field;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
-public class FloatView extends ImageButton {
+public class FloatView extends LinearLayout {
 
 	/**
 	 * 记录小悬浮窗的宽度
@@ -69,13 +70,13 @@ public class FloatView extends ImageButton {
 	 * 记录手指按下时在小悬浮窗的View上的纵坐标的值
 	 */
 	private float yInView;
-	
+
 	private OnUpListener onUpListener;
-	
+
 	public interface OnUpListener {
 		void onUp(View v);
 	}
-	
+
 	public void setOnUpListener(OnUpListener onUpListener) {
 		this.onUpListener = onUpListener;
 	}
@@ -84,10 +85,13 @@ public class FloatView extends ImageButton {
 		super(context, attrs, defStyleAttr);
 		// TODO Auto-generated constructor stub
 		windowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-//		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.FloatView); // 独立属性（声明在declare之外的）无法在此使用
-		viewWidth = getWidth();
-		viewHeight = getHeight();
-//		typedArray.recycle();
+		// TypedArray typedArray = context.obtainStyledAttributes(attrs,
+		// R.styleable.FloatView); // 独立属性（声明在declare之外的）无法在此使用
+		// typedArray.recycle();
+		LayoutInflater.from(context).inflate(R.layout.view_float, this);
+		View view = findViewById(R.id.float_layout);
+		viewWidth = view.getLayoutParams().width;
+		viewHeight = view.getLayoutParams().height;
 	}
 
 	public FloatView(Context context, AttributeSet attrs) {
@@ -123,7 +127,9 @@ public class FloatView extends ImageButton {
 			// 如果手指离开屏幕时，xDownInScreen和xInScreen相等，且yDownInScreen和yInScreen相等，则视为触发了单击事件。
 			if (xDownInScreen == xInScreen && yDownInScreen == yInScreen) {
 				// openBigWindow(); // 使用回调
-				onUpListener.onUp(FloatView.this); // 使用回调
+				if (onUpListener != null) {
+					onUpListener.onUp(FloatView.this); // 使用回调
+				}
 			}
 			break;
 		default:

@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				// TODO Auto-generated method stub
 				if(Constant.DEBUG) {
-					Log.d(MainActivity.class.getName(), "now the button is " + isChecked);
+					Log.i(MainActivity.class.getName(), "now the button is " + isChecked);
 				}
 				Intent intent = new Intent(MainActivity.this, FloatWindowService.class);
 				if (isChecked) {

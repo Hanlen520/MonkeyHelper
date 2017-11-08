@@ -22,9 +22,10 @@ public class FloatWindowManager {
 		int screenWidth = displayMetrics.widthPixels;
 		int screenHeight = displayMetrics.heightPixels;
 		if (floatView == null) {
-			floatView = (FloatView) View.inflate(context, R.layout.view_float, null);
+			floatView = new FloatView(context);
 			if (floatViewParams == null) {
 				floatViewParams = new LayoutParams();
+				int width = floatView.getViewWidth();
 				floatViewParams.x = screenWidth / 2 - floatView.getViewWidth() / 2;
 				floatViewParams.y = screenHeight / 2 - floatView.getViewHeight() / 2;
 				floatViewParams.type = LayoutParams.TYPE_TOAST;
@@ -32,7 +33,9 @@ public class FloatWindowManager {
 				floatViewParams.gravity = Gravity.START | Gravity.TOP;
 				floatViewParams.width = floatView.getViewWidth();
 				floatViewParams.height = floatView.getViewHeight();
+				floatViewParams.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL | LayoutParams.FLAG_NOT_FOCUSABLE;
 			}
+			floatView.setParams(floatViewParams);
 			windowManager.addView(floatView, floatViewParams);
 		}
 	}
