@@ -18,8 +18,9 @@ public class SPUtils {
 	// public static final int DISABLE_EXPAND = 0x00010000;
 	// public static final String STATUSBAR = "statusbar";
 	// public static final String FIRST = "default";
-	protected static final String BLACKLIST = "blacklist";
+	public static final String BLACKLIST = "blacklist";
 	public static final String EXPAND_DISABLED = "expand_disabled";
+	public static final String FLOATVIEW_MESSAGE_READED = "floatview_message_readed";
 
 	public static void setValue(Context context, String key, String value) {
 		SharedPreferences sharedPreferences = context.getSharedPreferences(SPFILE, Context.MODE_WORLD_READABLE);

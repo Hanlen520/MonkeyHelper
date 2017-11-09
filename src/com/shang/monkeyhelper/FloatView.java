@@ -143,7 +143,7 @@ public class FloatView extends LinearLayout {
 				// openBigWindow(); // 使用回调
 				Log.i(FloatView.class.getName(), "ACTION_UP is done!");
 				if (onUpListener != null) {
-					onUpListener.onUp(FloatView.this); // 使用回调
+					onUpListener.onUp(this); // 使用回调
 				}
 			}
 			break;

@@ -1,28 +1,21 @@
 package com.shang.monkeyhelper;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 /**
  * @author shang
@@ -74,16 +67,55 @@ public class MainActivity extends Activity {
 		change_floatview.setText(isServiceRunning(FloatWindowService.class.getName()) ? "悬浮按钮已开启" : "悬浮按钮已关闭");
 		change_floatview.setOnClickListener(new View.OnClickListener() {
 
+			private void showFloatViewAndChangeButtonText() {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(MainActivity.this, FloatWindowService.class);
+				startService(intent);
+				change_floatview.setText("悬浮按钮已开启");
+			}
+
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent = new Intent(MainActivity.this, FloatWindowService.class);
 				if (isServiceRunning(FloatWindowService.class.getName())) {
+					Intent intent = new Intent(MainActivity.this, FloatWindowService.class);
 					stopService(intent);
 					((Button) v).setText("悬浮按钮已关闭");
 				} else {
-					startService(intent);
-					((Button) v).setText("悬浮按钮已开启");
+					if (SPUtils.getValue(getApplicationContext(), SPUtils.FLOATVIEW_MESSAGE_READED, false)) {
+						showFloatViewAndChangeButtonText();
+					} else {
+						AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+						builder.setIcon(android.R.drawable.ic_dialog_alert).setTitle("注意！");
+						builder.setMessage("使用悬浮按钮获取您正在交互的页面的Activiy需要Root权限，请确保您的设备已Root。");
+						builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								showFloatViewAndChangeButtonText();
+							}
+						});
+						builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+
+							}
+						});
+						builder.setNeutralButton("确定（不再提示）", new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								showFloatViewAndChangeButtonText();
+								SPUtils.setValue(getApplicationContext(), SPUtils.FLOATVIEW_MESSAGE_READED, true);
+							}
+
+						});
+						builder.show().setCanceledOnTouchOutside(false);
+					}
 				}
 			}
 
@@ -97,21 +129,23 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated method stub
 				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this,
 						AlertDialog.THEME_DEVICE_DEFAULT_DARK);
-				builder.setIcon(R.drawable.ic_launcher).setTitle("Root方式启用/禁用通知栏")
-						.setMessage("您当前的systemui进程已" + (isProcessRunning("com.android.systemui") ? "启用" : "禁用")
-								+ "\n点击确定后将" + (isProcessRunning("com.android.systemui") ? "禁用" : "启用") + "通知栏"
-								+ "\n注意：该操作将会自动重启手机");
+				builder.setIcon(android.R.drawable.ic_dialog_alert).setTitle("Root方式启用/禁用通知栏")
+						.setMessage("您当前的systemui已" + (isSystemUIEabled() ? "启用" : "禁用") + "\n点击确定后将"
+								+ (isSystemUIEabled() ? "禁用" : "启用") + "通知栏" + "\n注意：该操作将会自动重启手机");
 				builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						// TODO Auto-generated method stub
-						if (isProcessRunning("com.android.systemui")) {
-							execCmd("su", "-c", "pm disable com.android.systemui");
+						if (isSystemUIEabled()) {
+							ShellUtils.execCmd("su", "-c", "pm disable com.android.systemui");
+							// getPackageManager().setApplicationEnabledSetting("com.android.systemui",
+							// PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+							// PackageManager.DONT_KILL_APP); // 此方式无法以root权限运行
 						} else {
-							execCmd("su", "-c", "pm enable com.android.systemui");
+							ShellUtils.execCmd("su", "-c", "pm enable com.android.systemui");
 						}
-						execCmd("su", "-c", "reboot");
+						ShellUtils.execCmd("su", "-c", "reboot");
 					}
 				});
 				builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -122,7 +156,7 @@ public class MainActivity extends Activity {
 
 					}
 				});
-				builder.show().setCanceledOnTouchOutside(true);
+				builder.show().setCanceledOnTouchOutside(false);
 			}
 		});
 	}
@@ -196,6 +230,11 @@ public class MainActivity extends Activity {
 		// Toast.LENGTH_LONG).show();
 	}
 
+	/**
+	 * @param serviceName
+	 *            e.g.: "com.android.systemui"
+	 * @return
+	 */
 	private boolean isServiceRunning(String serviceName) {
 		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -206,34 +245,27 @@ public class MainActivity extends Activity {
 		return false;
 	}
 
+	private boolean isSystemUIEabled() {
+		int state = getPackageManager().getApplicationEnabledSetting("com.android.systemui");
+		switch (state) {
+		case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+			return true;
+		case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+			return false;
+		default:
+			return true;
+		}
+	}
+
 	/**
-	 * 判断进程是否正在运行
+	 * 判断进程是否正在运行（pm disable com.android.systemui后该进程依旧存在）
 	 * 
 	 * @param processName
 	 * @return
 	 */
 	private boolean isProcessRunning(String processName) {
-		String result = execCmd("sh", "-c", "ps |grep " + processName);
+		String result = ShellUtils.execCmd("sh", "-c", "ps |grep " + processName);
 		return result.contains(processName);
 	}
 
-	private String execCmd(String... string) {
-		// TODO Auto-generated method stub
-		StringBuilder result = new StringBuilder(); // 线程不安全
-		InputStreamReader inputStreamReader = null;
-		BufferedReader bufferedReader = null;
-		try {
-			Process process = Runtime.getRuntime().exec(string);
-			inputStreamReader = new InputStreamReader(process.getInputStream());
-			bufferedReader = new BufferedReader(inputStreamReader);
-			String temp = null;
-			while ((temp = bufferedReader.readLine()) != null) {
-				result.append(temp).append("\n");
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return result.toString();
-	}
 }

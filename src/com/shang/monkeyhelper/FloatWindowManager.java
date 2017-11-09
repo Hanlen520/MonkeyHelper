@@ -47,6 +47,15 @@ public class FloatWindowManager {
 		}
 	}
 
+	public static FloatView getFloatView(Context context) { // 如果传入Context会造成混乱，CreateFloatView中用的是Service的Context
+															// //
+															// 其实并不会，单例模式限制了第二次传入的参数不会生效
+		if (floatView == null) {
+			createFloatView(context);
+		}
+		return floatView;
+	}
+
 	private static WindowManager getWindowManager(Context context) {
 		if (mWindowManager == null) {
 			mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
