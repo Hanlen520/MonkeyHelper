@@ -71,7 +71,9 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated method stub
 				Intent intent = new Intent(MainActivity.this, FloatWindowService.class);
 				startService(intent);
-				change_floatview.setText("悬浮按钮已开启");
+				if (isServiceRunning(FloatWindowService.class.getName())) {
+					change_floatview.setText("悬浮按钮已开启");
+				}
 			}
 
 			@Override
@@ -232,7 +234,7 @@ public class MainActivity extends Activity {
 
 	/**
 	 * @param serviceName
-	 *            e.g.: "com.android.systemui"
+	 *            e.g.: "com.shang.monkeyhelper.FloatWindowService"
 	 * @return
 	 */
 	private boolean isServiceRunning(String serviceName) {

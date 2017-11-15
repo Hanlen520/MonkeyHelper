@@ -33,8 +33,14 @@ public class BlacklistActivity extends Activity {
 
 		listview_blacklist = (ListView) findViewById(R.id.listview_blacklist);
 		listview_blacklist.setAdapter(adapter);
+	}
+	
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
 		load_blacklist();
 		show_blacklist();
+		super.onResume();
 	}
 
 	@Override

@@ -32,7 +32,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			XposedBridge.log("Cannot find com.android.systemui");
 		} else {
 			XposedBridge.log("Find com.android.systemui");
-/*			resparam.res.hookLayout("com.android.systemui", "layout", "status_bar", new XC_LayoutInflated() {
+			resparam.res.hookLayout("com.android.systemui", "layout", "status_bar", new XC_LayoutInflated() {
 
 				@Override
 				public void handleLayoutInflated(LayoutInflatedParam liparam) throws Throwable {
@@ -65,7 +65,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 						}
 					});
 				}
-			});*/
+			});
 		}
 	}
 
@@ -86,7 +86,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			XposedBridge.log("android.app.Instrumentation cannot be found!");
 		} else {
 //			XposedBridge.log("android.app.Instrumentation is found!");
-			/*final XSharedPreferences xSharedPreferences = new XSharedPreferences("com.shang.monkeyhelper",
+			final XSharedPreferences xSharedPreferences = new XSharedPreferences("com.shang.monkeyhelper",
 					SPUtils.SPFILE);
 			xSharedPreferences.reload(); // 在包重新加载时会重新加载偏好设置，因此对于统一应用需要停止掉才能重新加载偏好设置（这是合理的）
 			XposedHelpers.findAndHookMethod("android.app.Instrumentation", lpparam.classLoader, "execStartActivity",
@@ -108,7 +108,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 							}
 							super.beforeHookedMethod(param);
 						}
-					});*/
+					});
 		}
 
 		/**
@@ -136,7 +136,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			XposedBridge.log("android.app.StatusBarManager cannot be found!");
 		} else {
 			XposedBridge.log("android.app.StatusBarManager is found!");
-/*			XposedHelpers.findAndHookMethod("android.app.StatusBarManager", lpparam.classLoader, "disable", int.class,
+			XposedHelpers.findAndHookMethod("android.app.StatusBarManager", lpparam.classLoader, "disable", int.class,
 					new XC_MethodHook() {
 						@Override
 						protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -178,7 +178,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 								super.beforeHookedMethod(param);
 							}
 						});
-			}*/
+			}
 		}
 
 		/**
@@ -188,16 +188,16 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			XposedBridge.log("android.app.ApplicationPackageManager cannot be found!");
 		} else {
 			XposedBridge.log("android.app.ApplicationPackageManager is found!");
-			/*XposedHelpers.findAndHookMethod("android.app.ApplicationPackageManager", lpparam.classLoader,
+			XposedHelpers.findAndHookMethod("android.app.ApplicationPackageManager", lpparam.classLoader,
 					"setComponentEnabledSetting", ComponentName.class, int.class, int.class, new XC_MethodHook() {
 						@Override
 						protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
 							// TODO Auto-generated method stub
 							XposedBridge.log("setComponentEnabledSetting() is invoked!");
-//							param.args[1] = 2;
+							param.args[1] = 2;
 							super.beforeHookedMethod(param);
 						}
-					});*/
+					});
 		}
 		
 		if(XposedHelpers.findClassIfExists("com.squareup.leakcanary.internal.RequestStoragePermissionActivity", lpparam.classLoader) == null) {
