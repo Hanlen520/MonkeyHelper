@@ -21,6 +21,7 @@ public class SPUtils {
 	public static final String BLACKLIST = "blacklist";
 	public static final String EXPAND_DISABLED = "expand_disabled";
 	public static final String FLOATVIEW_MESSAGE_READED = "floatview_message_readed";
+	public static final String SHOW_LEAKICON = "show_leakicon";
 
 	public static void setValue(Context context, String key, String value) {
 		SharedPreferences sharedPreferences = context.getSharedPreferences(SPFILE, Context.MODE_WORLD_READABLE);

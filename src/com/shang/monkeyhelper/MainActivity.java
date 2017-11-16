@@ -29,6 +29,7 @@ public class MainActivity extends Activity {
 	private boolean expand_disabled;
 	private Button change_floatview;
 	private Button to_systemui;
+	private Button change_leakicon;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +160,21 @@ public class MainActivity extends Activity {
 					}
 				});
 				builder.show().setCanceledOnTouchOutside(false);
+			}
+		});
+
+		change_leakicon = (Button) findViewById(R.id.change_leakicon);
+		change_leakicon.setText(SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true)
+				? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
+		change_leakicon.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				SPUtils.setValue(getApplicationContext(), SPUtils.SHOW_LEAKICON,
+						!SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true));
+				((Button) v).setText(SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true)
+						? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
 			}
 		});
 	}
