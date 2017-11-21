@@ -9,7 +9,10 @@ import android.app.ActivityManager.RunningServiceInfo;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +33,15 @@ public class MainActivity extends Activity {
 	private Button change_floatview;
 	private Button to_systemui;
 	private Button change_leakicon;
+	private Button restart_launcher;
+	private Handler mHandler = new Handler(new Handler.Callback() {
+		
+		@Override
+		public boolean handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+	});
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -177,6 +189,25 @@ public class MainActivity extends Activity {
 						? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
 			}
 		});
+
+		restart_launcher = (Button) findViewById(R.id.restart_launcher);
+		restart_launcher.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				String launcher_name = getLauncherPackageName();
+				if (launcher_name.length() == 0) {
+					Toast.makeText(getApplicationContext(), "无法获取当前系统的Launcher名", Toast.LENGTH_SHORT).show();
+				} else {
+					Log.i(MainActivity.class.getName(), ShellUtils.execCmd("su", "-c", "am force-stop " + launcher_name));
+					/*if (!isServiceRunning(launcher_name)) {
+						Log.i(MainActivity.class.getName(), ShellUtils.execCmd("sh", "-c",
+								"am start -n " + launcher_name + "/" + getLauncherActivityName()));
+					}*/
+				}
+			}
+		});
 	}
 
 	@Override
@@ -281,9 +312,49 @@ public class MainActivity extends Activity {
 	 * @param processName
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private boolean isProcessRunning(String processName) {
 		String result = ShellUtils.execCmd("sh", "-c", "ps |grep " + processName);
 		return result.contains(processName);
 	}
 
+	/**
+	 * 获取当前系统的Launcher包名
+	 * 
+	 * @return
+	 */
+	private String getLauncherPackageName() {
+		final Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.addCategory(Intent.CATEGORY_HOME);
+		final ResolveInfo res = this.getPackageManager().resolveActivity(intent, 0);
+		if (res.activityInfo == null) {
+			return "";
+		}
+		if (res.activityInfo.packageName.equals("android")) {
+			// 有多个桌面程序存在，且未指定默认项时；
+			return "";
+		} else {
+			return res.activityInfo.packageName;
+		}
+	}
+
+	/**
+	 * 获取当前系统的Launcher Activity名
+	 * 
+	 * @return
+	 */
+	private String getLauncherActivityName() {
+		final Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.addCategory(Intent.CATEGORY_HOME);
+		final ResolveInfo res = this.getPackageManager().resolveActivity(intent, 0);
+		if (res.activityInfo == null) {
+			return "";
+		}
+		if (res.activityInfo.packageName.equals("android")) {
+			// 有多个桌面程序存在，且未指定默认项时；
+			return "";
+		} else {
+			return res.activityInfo.name;
+		}
+	}
 }
