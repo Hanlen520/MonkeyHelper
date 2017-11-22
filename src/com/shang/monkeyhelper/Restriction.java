@@ -1,10 +1,6 @@
 package com.shang.monkeyhelper;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -191,7 +187,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			if(XposedHelpers.findMethodExactIfExists("com.squareup.leakcanary.LeakCanary", lpparam.classLoader, "setEnabled", Context.class, Class.class, boolean.class) == null) {
 				XposedBridge.log("setEnabled() not found!");
 			} else {
-				XposedHelpers.findAndHookMethod("com.squareup.leakcanary.LeakCanary", lpparam.classLoader,
+				/*XposedHelpers.findAndHookMethod("com.squareup.leakcanary.LeakCanary", lpparam.classLoader,
 						"setEnabled", Context.class, Class.class, boolean.class, new XC_MethodHook() {
 							@Override
 							protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -200,7 +196,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 								param.args[2] = xSharedPreferences.getBoolean(SPUtils.SHOW_LEAKICON, true);
 								super.beforeHookedMethod(param);
 							}
-						});
+						});*/
 			}
 		}
 		if (XposedHelpers.findClassIfExists("com.squareup.leakcanary.internal.LeakCanaryInternals", lpparam.classLoader) == null) {
@@ -210,7 +206,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			if(XposedHelpers.findMethodExactIfExists("com.squareup.leakcanary.internal.LeakCanaryInternals", lpparam.classLoader, "setEnabled", Context.class, Class.class, boolean.class) == null) {
 				XposedBridge.log("setEnabled() not found!");
 			} else {
-				XposedHelpers.findAndHookMethod("com.squareup.leakcanary.internal.LeakCanaryInternals", lpparam.classLoader,
+				/*XposedHelpers.findAndHookMethod("com.squareup.leakcanary.internal.LeakCanaryInternals", lpparam.classLoader,
 						"setEnabled", Context.class, Class.class, boolean.class, new XC_MethodHook() {
 					@Override
 					protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -219,7 +215,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 						param.args[2] = xSharedPreferences.getBoolean(SPUtils.SHOW_LEAKICON, true);
 						super.beforeHookedMethod(param);
 					}
-				});
+				});*/
 			}
 		}
 		
@@ -252,20 +248,6 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 					// TODO Auto-generated method stub
 					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
 					super.afterHookedMethod(param);
-				}
-				@Override
-				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					String activity_name = param.thisObject.getClass().getName();
-					XposedBridge.log("Find Activity: " + activity_name);
-					Set<String> set = xSharedPreferences.getStringSet(SPUtils.BLACKLIST,
-							new HashSet<String>());
-					if (set.contains(activity_name)) { // 暂时只考虑代码包名
-						XposedBridge.log("This activity is in the blacklist!");
-						param.setResult(null);
-					}
-					super.beforeHookedMethod(param);
 				}
 			});
 			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onPause", new XC_MethodHook() {

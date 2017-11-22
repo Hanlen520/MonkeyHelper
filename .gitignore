@@ -1,3 +1,4 @@
 /gen/
 /bin/
 /lint.xml
+/lib/.gitignore
