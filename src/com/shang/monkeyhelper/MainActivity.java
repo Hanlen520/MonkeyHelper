@@ -32,16 +32,17 @@ public class MainActivity extends Activity {
 	private boolean expand_disabled;
 	private Button change_floatview;
 	private Button to_systemui;
-	private Button change_leakicon;
+	// private Button change_leakicon;
 	private Button restart_launcher;
 	private Handler mHandler = new Handler(new Handler.Callback() {
-		
+
 		@Override
 		public boolean handleMessage(Message msg) {
 			// TODO Auto-generated method stub
 			return false;
 		}
 	});
+	private Button to_leaks;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -175,20 +176,23 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		change_leakicon = (Button) findViewById(R.id.change_leakicon);
-		change_leakicon.setText(SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true)
-				? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
-		change_leakicon.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				SPUtils.setValue(getApplicationContext(), SPUtils.SHOW_LEAKICON,
-						!SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true));
-				((Button) v).setText(SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true)
-						? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
-			}
-		});
+		// change_leakicon = (Button) findViewById(R.id.change_leakicon);
+		// change_leakicon.setText(SPUtils.getValue(getApplicationContext(),
+		// SPUtils.SHOW_LEAKICON, true)
+		// ? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
+		// change_leakicon.setOnClickListener(new View.OnClickListener() {
+		//
+		// @Override
+		// public void onClick(View v) {
+		// // TODO Auto-generated method stub
+		// SPUtils.setValue(getApplicationContext(), SPUtils.SHOW_LEAKICON,
+		// !SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON,
+		// true));
+		// ((Button) v).setText(SPUtils.getValue(getApplicationContext(),
+		// SPUtils.SHOW_LEAKICON, true)
+		// ? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
+		// }
+		// });
 
 		restart_launcher = (Button) findViewById(R.id.restart_launcher);
 		restart_launcher.setOnClickListener(new View.OnClickListener() {
@@ -200,12 +204,32 @@ public class MainActivity extends Activity {
 				if (launcher_name.length() == 0) {
 					Toast.makeText(getApplicationContext(), "无法获取当前系统的Launcher名", Toast.LENGTH_SHORT).show();
 				} else {
-					Log.i(MainActivity.class.getName(), ShellUtils.execCmd("su", "-c", "am force-stop " + launcher_name));
-					/*if (!isServiceRunning(launcher_name)) {
-						Log.i(MainActivity.class.getName(), ShellUtils.execCmd("sh", "-c",
-								"am start -n " + launcher_name + "/" + getLauncherActivityName()));
-					}*/
+					Log.i(MainActivity.class.getName(),
+							ShellUtils.execCmd("su", "-c", "am force-stop " + launcher_name));
+					/*
+					 * if (!isServiceRunning(launcher_name)) { // 启动Launcher
+					 * Log.i(MainActivity.class.getName(),
+					 * ShellUtils.execCmd("sh", "-c", "am start -n " +
+					 * launcher_name + "/" + getLauncherActivityName())); }
+					 */
 				}
+			}
+		});
+
+		to_leaks = (Button) findViewById(R.id.to_leaks);
+		to_leaks.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Log.i(MainActivity.class.getName(), ShellUtils.execCmd("sh", "-c",
+						"am start -n com.example.leakcanary/com.squareup.leakcanary.internal.DisplayLeakActivity"));
+//				Intent intent = new Intent();
+//				intent.setClassName("com.ce.leakcanarysample", "com.squareup.leakcanary.internal.DisplayLeakActivity");
+//				Log.i(MainActivity.class.getName(), getPackageManager().resolveActivity(intent, 0) == null ? "不存在" : "存在");
+				
+//				Intent intent = new Intent(MainActivity.this, LeakCanaryAppsActivity.class);
+//				startActivity(intent);
 			}
 		});
 	}
@@ -343,6 +367,7 @@ public class MainActivity extends Activity {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private String getLauncherActivityName() {
 		final Intent intent = new Intent(Intent.ACTION_MAIN);
 		intent.addCategory(Intent.CATEGORY_HOME);

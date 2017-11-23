@@ -76,8 +76,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 	@Override
 	public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 		// TODO Auto-generated method stub
-		final XSharedPreferences xSharedPreferences = new XSharedPreferences("com.shang.monkeyhelper",
-				SPUtils.SPFILE);
+		final XSharedPreferences xSharedPreferences = new XSharedPreferences("com.shang.monkeyhelper", SPUtils.SPFILE);
 		xSharedPreferences.reload(); // 在包重新加载时会重新加载偏好设置，因此对于统一应用需要停止掉才能重新加载偏好设置（这是合理的）
 		/**
 		 * 禁止Activity启动
@@ -85,7 +84,7 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 		if (XposedHelpers.findClassIfExists("android.app.Instrumentation", lpparam.classLoader) == null) {
 			XposedBridge.log("android.app.Instrumentation cannot be found!");
 		} else {
-//			XposedBridge.log("android.app.Instrumentation is found!");
+			// XposedBridge.log("android.app.Instrumentation is found!");
 			XposedHelpers.findAndHookMethod("android.app.Instrumentation", lpparam.classLoader, "execStartActivity",
 					Context.class, IBinder.class, IBinder.class, Activity.class, Intent.class, int.class, Bundle.class,
 					new XC_MethodHook() {
@@ -93,17 +92,20 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 						protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
 							// TODO Auto-generated method stub
 							XposedBridge.log("execStartActivity() invoked!");
-							/*if (param.args[4] != null) { // 不用去判断param存在与数组越界
-								Intent intent = (Intent) param.args[4];
-								String activity_name = intent.getComponent().getClassName();
-								XposedBridge.log("Find Activity: " + activity_name);
-								Set<String> set = xSharedPreferences.getStringSet(SPUtils.BLACKLIST,
-										new HashSet<String>());
-								if (set.contains(activity_name)) { // 暂时只考虑代码包名
-									XposedBridge.log("This activity is in the blacklist!");
-									param.setResult(null);
-								}
-							}*/
+							/*
+							 * if (param.args[4] != null) { // 不用去判断param存在与数组越界
+							 * Intent intent = (Intent) param.args[4]; String
+							 * activity_name =
+							 * intent.getComponent().getClassName();
+							 * XposedBridge.log("Find Activity: " +
+							 * activity_name); Set<String> set =
+							 * xSharedPreferences.getStringSet(SPUtils.
+							 * BLACKLIST, new HashSet<String>()); if
+							 * (set.contains(activity_name)) { // 暂时只考虑代码包名
+							 * XposedBridge.
+							 * log("This activity is in the blacklist!");
+							 * param.setResult(null); } }
+							 */
 							super.beforeHookedMethod(param);
 						}
 					});
@@ -113,34 +115,38 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 		 * hook special方法
 		 */
 		if (XposedHelpers.findClassIfExists("com.shang.monkeyhelper.MainActivity", lpparam.classLoader) == null) {
-			XposedBridge.log("com.shang.monkeyhelper.MainActivity cannot be found!");
+			// XposedBridge.log("com.shang.monkeyhelper.MainActivity cannot be
+			// found!");
 		} else {
-			XposedBridge.log("com.shang.monkeyhelper.MainActivity is found!");
-			/*XposedHelpers.findAndHookMethod("com.shang.monkeyhelper.MainActivity", lpparam.classLoader, "special",
-					Object.class, boolean.class, new XC_MethodHook() {
-						@Override
-						protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
-							// TODO Auto-generated method stub
-							param.args[0] = lpparam; // 可以回传对象至应用空间
-							super.beforeHookedMethod(param);
-						}
-					});*/
+			// XposedBridge.log("com.shang.monkeyhelper.MainActivity is
+			// found!");
+			/*
+			 * XposedHelpers.findAndHookMethod(
+			 * "com.shang.monkeyhelper.MainActivity", lpparam.classLoader,
+			 * "special", Object.class, boolean.class, new XC_MethodHook() {
+			 * 
+			 * @Override protected void beforeHookedMethod(final MethodHookParam
+			 * param) throws Throwable { // TODO Auto-generated method stub
+			 * param.args[0] = lpparam; // 可以回传对象至应用空间
+			 * super.beforeHookedMethod(param); } });
+			 */
 		}
 
 		/**
 		 * hook disable、expandNotificationsPanel方法
 		 */
 		if (XposedHelpers.findClassIfExists("android.app.StatusBarManager", lpparam.classLoader) == null) {
-			XposedBridge.log("android.app.StatusBarManager cannot be found!");
+			// XposedBridge.log("android.app.StatusBarManager cannot be
+			// found!");
 		} else {
-			XposedBridge.log("android.app.StatusBarManager is found!");
+			// XposedBridge.log("android.app.StatusBarManager is found!");
 			XposedHelpers.findAndHookMethod("android.app.StatusBarManager", lpparam.classLoader, "disable", int.class,
 					new XC_MethodHook() {
 						@Override
 						protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
 							// TODO Auto-generated method stub
-							XposedBridge.log("disable() is invoked!");
-							XposedBridge.log("param: " + param.thisObject);
+							// XposedBridge.log("disable() is invoked!");
+							// XposedBridge.log("param: " + param.thisObject);
 							// param.args[0] = 0x00010000; // 开机时执行，禁用通知栏下拉
 							super.beforeHookedMethod(param);
 						}
@@ -178,86 +184,100 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 		}
 
 		/**
-		 * hook leakcanary展示页面
+		 * hook leakcanary展示页面，禁用该Component会导致组件关联的进程无法启动！
 		 */
 		if (XposedHelpers.findClassIfExists("com.squareup.leakcanary.LeakCanary", lpparam.classLoader) == null) {
-			XposedBridge.log("com.squareup.leakcanary.LeakCanary cannot be found!");
+			// XposedBridge.log("com.squareup.leakcanary.LeakCanary cannot be
+			// found!");
 		} else {
-			XposedBridge.log("com.squareup.leakcanary.LeakCanary is found!");
-			if(XposedHelpers.findMethodExactIfExists("com.squareup.leakcanary.LeakCanary", lpparam.classLoader, "setEnabled", Context.class, Class.class, boolean.class) == null) {
-				XposedBridge.log("setEnabled() not found!");
+			// XposedBridge.log("com.squareup.leakcanary.LeakCanary is found!");
+			if (XposedHelpers.findMethodExactIfExists("com.squareup.leakcanary.LeakCanary", lpparam.classLoader,
+					"setEnabled", Context.class, Class.class, boolean.class) == null) {
+				// XposedBridge.log("setEnabled() not found!");
 			} else {
-				/*XposedHelpers.findAndHookMethod("com.squareup.leakcanary.LeakCanary", lpparam.classLoader,
-						"setEnabled", Context.class, Class.class, boolean.class, new XC_MethodHook() {
-							@Override
-							protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-								// TODO Auto-generated method stub
-								XposedBridge.log("setEnabled() is invoked!");
-								param.args[2] = xSharedPreferences.getBoolean(SPUtils.SHOW_LEAKICON, true);
-								super.beforeHookedMethod(param);
-							}
-						});*/
+				/*
+				 * XposedHelpers.findAndHookMethod(
+				 * "com.squareup.leakcanary.LeakCanary", lpparam.classLoader,
+				 * "setEnabled", Context.class, Class.class, boolean.class, new
+				 * XC_MethodHook() {
+				 * 
+				 * @Override protected void beforeHookedMethod(MethodHookParam
+				 * param) throws Throwable { // TODO Auto-generated method stub
+				 * XposedBridge.log("setEnabled() is invoked!"); param.args[2] =
+				 * xSharedPreferences.getBoolean(SPUtils.SHOW_LEAKICON, true);
+				 * super.beforeHookedMethod(param); } });
+				 */
 			}
 		}
-		if (XposedHelpers.findClassIfExists("com.squareup.leakcanary.internal.LeakCanaryInternals", lpparam.classLoader) == null) {
-			XposedBridge.log("com.squareup.leakcanary.internal.LeakCanaryInternals cannot be found!");
+		if (XposedHelpers.findClassIfExists("com.squareup.leakcanary.internal.LeakCanaryInternals",
+				lpparam.classLoader) == null) {
+			// XposedBridge.log("com.squareup.leakcanary.internal.LeakCanaryInternals
+			// cannot be found!");
 		} else {
-			XposedBridge.log("com.squareup.leakcanary.internal.LeakCanaryInternals is found!");
-			if(XposedHelpers.findMethodExactIfExists("com.squareup.leakcanary.internal.LeakCanaryInternals", lpparam.classLoader, "setEnabled", Context.class, Class.class, boolean.class) == null) {
-				XposedBridge.log("setEnabled() not found!");
+			// XposedBridge.log("com.squareup.leakcanary.internal.LeakCanaryInternals
+			// is found!");
+			if (XposedHelpers.findMethodExactIfExists("com.squareup.leakcanary.internal.LeakCanaryInternals",
+					lpparam.classLoader, "setEnabled", Context.class, Class.class, boolean.class) == null) {
+				// XposedBridge.log("setEnabled() not found!");
 			} else {
-				/*XposedHelpers.findAndHookMethod("com.squareup.leakcanary.internal.LeakCanaryInternals", lpparam.classLoader,
-						"setEnabled", Context.class, Class.class, boolean.class, new XC_MethodHook() {
-					@Override
-					protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-						// TODO Auto-generated method stub
-						XposedBridge.log("setEnabled() is invoked!");
-						param.args[2] = xSharedPreferences.getBoolean(SPUtils.SHOW_LEAKICON, true);
-						super.beforeHookedMethod(param);
-					}
-				});*/
+				/*
+				 * XposedHelpers.findAndHookMethod(
+				 * "com.squareup.leakcanary.internal.LeakCanaryInternals",
+				 * lpparam.classLoader, "setEnabled", Context.class,
+				 * Class.class, boolean.class, new XC_MethodHook() {
+				 * 
+				 * @Override protected void beforeHookedMethod(MethodHookParam
+				 * param) throws Throwable { // TODO Auto-generated method stub
+				 * XposedBridge.log("setEnabled() is invoked!"); param.args[2] =
+				 * xSharedPreferences.getBoolean(SPUtils.SHOW_LEAKICON, true);
+				 * super.beforeHookedMethod(param); } });
+				 */
 			}
 		}
-		
+
 		/**
 		 * Activity生命周期
 		 */
-		if(XposedHelpers.findClassIfExists("android.app.Activity", lpparam.classLoader) == null) {
+		if (XposedHelpers.findClassIfExists("android.app.Activity", lpparam.classLoader) == null) {
 			XposedBridge.log("android.app.Activity cannot be found!");
 		} else {
 			XposedBridge.log("android.app.Activity is found!");
-			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
-			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onStart", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
-			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onResume", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
-			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onPause", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onCreate", Bundle.class,
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onStart",
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onResume",
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onPause",
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
 			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onStop", new XC_MethodHook() {
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -266,71 +286,78 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 					super.afterHookedMethod(param);
 				}
 			});
-			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onRestart", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
-			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onDestroy", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onRestart",
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
+			XposedHelpers.findAndHookMethod("android.app.Activity", lpparam.classLoader, "onDestroy",
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
 		}
-		
+
 		/**
 		 * Application生命周期
 		 */
-		if(XposedHelpers.findClassIfExists("android.app.Application", lpparam.classLoader) == null) {
+		if (XposedHelpers.findClassIfExists("android.app.Application", lpparam.classLoader) == null) {
 			XposedBridge.log("android.app.Application cannot be found!");
 		} else {
 			XposedBridge.log("android.app.Application is found!");
-			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onCreate", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
-			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onTerminate", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
-			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onConfigurationChanged", Configuration.class, new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
-			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onLowMemory", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
-			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onTrimMemory", int.class, new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					// TODO Auto-generated method stub
-					XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
-					super.afterHookedMethod(param);
-				}
-			});
+			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onCreate",
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
+			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onTerminate",
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
+			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onConfigurationChanged",
+					Configuration.class, new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
+			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onLowMemory",
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
+			XposedHelpers.findAndHookMethod("android.app.Application", lpparam.classLoader, "onTrimMemory", int.class,
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							super.afterHookedMethod(param);
+						}
+					});
 		}
 	}
 
