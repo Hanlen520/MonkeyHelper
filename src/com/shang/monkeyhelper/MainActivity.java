@@ -222,14 +222,14 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Log.i(MainActivity.class.getName(), ShellUtils.execCmd("sh", "-c",
-						"am start -n com.example.leakcanary/com.squareup.leakcanary.internal.DisplayLeakActivity"));
+//				Log.i(MainActivity.class.getName(), ShellUtils.execCmd("sh", "-c",
+//						"am start -n com.example.leakcanary/com.squareup.leakcanary.internal.DisplayLeakActivity"));
 //				Intent intent = new Intent();
 //				intent.setClassName("com.ce.leakcanarysample", "com.squareup.leakcanary.internal.DisplayLeakActivity");
 //				Log.i(MainActivity.class.getName(), getPackageManager().resolveActivity(intent, 0) == null ? "不存在" : "存在");
 				
-//				Intent intent = new Intent(MainActivity.this, LeakCanaryAppsActivity.class);
-//				startActivity(intent);
+				Intent intent = new Intent(MainActivity.this, LeakCanaryAppsActivity.class);
+				startActivity(intent);
 			}
 		});
 	}

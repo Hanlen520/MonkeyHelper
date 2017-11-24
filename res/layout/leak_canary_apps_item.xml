@@ -12,13 +12,22 @@
         android:layout_height="48dp"
         android:background="@android:color/transparent" />
 
+    <ImageView
+        android:id="@+id/apps_leak_icon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_alignBottom="@id/apps_icon"
+        android:layout_alignEnd="@id/apps_icon"
+        android:background="@android:color/transparent" />
+
     <TextView
         android:id="@+id/apps_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/apps_icon"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/apps_icon"
         android:text="@null"
         android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 

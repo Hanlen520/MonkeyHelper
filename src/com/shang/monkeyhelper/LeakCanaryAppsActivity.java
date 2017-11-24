@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
@@ -27,6 +31,16 @@ public class LeakCanaryAppsActivity extends Activity {
 
 		listView = (ListView) findViewById(R.id.apps_list);
 		listView.setAdapter(adapter);
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				// TODO Auto-generated method stub
+				ResolveInfo mainInfo = (ResolveInfo) adapter.getItem(position);
+				Log.i(LeakCanaryAppsActivity.class.getName(), ShellUtils.execCmd("sh", "-c",
+						"am start -n " + mainInfo.activityInfo.packageName + "/" + ResolveUtils.DISPLAY_LEAK_ACTIVITY));
+			}
+		});
 	}
 
 	@Override
@@ -47,6 +61,16 @@ public class LeakCanaryAppsActivity extends Activity {
 		resolveInfos.clear();
 		Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
 		mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-		resolveInfos.addAll(getPackageManager().queryIntentActivities(mainIntent, 0));
+		List<ResolveInfo> allInfos = getPackageManager().queryIntentActivities(mainIntent, 0);
+		for (ResolveInfo info : allInfos) {
+			if (ResolveUtils.resolveDisplayLeakActivity(getApplicationContext(),
+					info.activityInfo.packageName) != null) {
+				if (!info.activityInfo.name.equals(ResolveUtils.DISPLAY_LEAK_ACTIVITY)) {
+					resolveInfos.add(info);
+				}
+			}
+		}
+		Log.i(LeakCanaryAppsActivity.class.getName(), resolveInfos.toString());
 	}
+
 }

@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class LeakCanaryAppsAdapter extends BaseAdapter {
-	
+
 	private List<ResolveInfo> mApps;
 	private Context context;
 
@@ -42,14 +42,30 @@ public class LeakCanaryAppsAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// TODO Auto-generated method stub
-		if(convertView == null) {
+		ViewHolder viewHolder;
+		if (convertView == null) {
 			convertView = View.inflate(context, R.layout.leak_canary_apps_item, null);
+			viewHolder = new ViewHolder();
+			viewHolder.mainIcon = (ImageView) convertView.findViewById(R.id.apps_icon);
+			viewHolder.leakIcon = (ImageView) convertView.findViewById(R.id.apps_leak_icon);
+			viewHolder.mainName = (TextView) convertView.findViewById(R.id.apps_name);
+			convertView.setTag(viewHolder);
+		} else {
+			viewHolder = (ViewHolder) convertView.getTag();
 		}
-		ImageView imageView = (ImageView) convertView.findViewById(R.id.apps_icon);
-		TextView textView = (TextView) convertView.findViewById(R.id.apps_name);
-		imageView.setImageDrawable(getItem(position).activityInfo.loadIcon(context.getPackageManager()));
-		textView.setText(getItem(position).activityInfo.name);
+		ResolveInfo mainInfo = getItem(position);
+		viewHolder.mainIcon.setImageDrawable(mainInfo.activityInfo.loadIcon(context.getPackageManager()));
+		viewHolder.mainName.setText(mainInfo.activityInfo.name);
+		ResolveInfo leakInfo = ResolveUtils.resolveDisplayLeakActivity(context, mainInfo.activityInfo.packageName);
+		viewHolder.leakIcon.setImageDrawable(leakInfo.activityInfo.loadIcon(context.getPackageManager()));
 		return convertView;
+	}
+
+	class ViewHolder {
+		ImageView mainIcon;
+		ImageView leakIcon;
+		TextView mainName;
+		TextView leakName;
 	}
 
 }
