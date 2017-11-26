@@ -26,6 +26,8 @@ public class LeakCanaryAppsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_leak_canary_apps);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+
 		resolveInfos = new ArrayList<ResolveInfo>();
 		adapter = new LeakCanaryAppsAdapter(getApplicationContext(), resolveInfos);
 
@@ -49,6 +51,21 @@ public class LeakCanaryAppsActivity extends Activity {
 		loadApps();
 		showApps();
 		super.onResume();
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			break;
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	private void showApps() {

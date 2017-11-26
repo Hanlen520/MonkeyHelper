@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -48,8 +49,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		expand_disabled = SPUtils.getValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, false);
-		Toast.makeText(getApplicationContext(), expand_disabled ? "通知栏已禁用" : "通知栏未禁用", Toast.LENGTH_SHORT).show();
 		to_blacklist = (Button) findViewById(R.id.to_blacklist);
 		to_blacklist.setOnClickListener(new View.OnClickListener() {
 
@@ -62,20 +61,31 @@ public class MainActivity extends Activity {
 
 		});
 
+		expand_disabled = SPUtils.getValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, false);
 		to_statusbar = (Button) findViewById(R.id.to_statusbar);
-		to_statusbar.setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
-		to_statusbar.setOnClickListener(new View.OnClickListener() {
+		if (isSystemUIEabled()) {
+			Toast.makeText(getApplicationContext(), expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉", Toast.LENGTH_SHORT)
+					.show();
+			to_statusbar.setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
+			to_statusbar.setOnClickListener(new View.OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				SPUtils.setValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, !expand_disabled);
-				expand_disabled = SPUtils.getValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, expand_disabled);
-				Toast.makeText(getApplicationContext(), expand_disabled ? "通知栏已禁用" : "通知栏未禁用", Toast.LENGTH_SHORT)
-						.show();
-				((Button) v).setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
-			}
-		});
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					SPUtils.setValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, !expand_disabled);
+					expand_disabled = SPUtils.getValue(getApplicationContext(), SPUtils.EXPAND_DISABLED,
+							expand_disabled);
+					Toast.makeText(getApplicationContext(), expand_disabled ? "通知栏已禁用" : "通知栏未禁用", Toast.LENGTH_SHORT)
+							.show();
+					((Button) v).setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
+				}
+			});
+		} else {
+			Toast.makeText(getApplicationContext(), "通知栏已禁止下拉", Toast.LENGTH_SHORT).show();
+			to_statusbar.setText("通知栏已禁止下拉");
+			to_statusbar.setClickable(false);
+			to_statusbar.setTextColor(Color.GRAY);
+		}
 
 		change_floatview = (Button) findViewById(R.id.change_floatview);
 		change_floatview.setText(isServiceRunning(FloatWindowService.class.getName()) ? "悬浮按钮已开启" : "悬浮按钮已关闭");
@@ -222,12 +232,6 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-//				Log.i(MainActivity.class.getName(), ShellUtils.execCmd("sh", "-c",
-//						"am start -n com.example.leakcanary/com.squareup.leakcanary.internal.DisplayLeakActivity"));
-//				Intent intent = new Intent();
-//				intent.setClassName("com.ce.leakcanarysample", "com.squareup.leakcanary.internal.DisplayLeakActivity");
-//				Log.i(MainActivity.class.getName(), getPackageManager().resolveActivity(intent, 0) == null ? "不存在" : "存在");
-				
 				Intent intent = new Intent(MainActivity.this, LeakCanaryAppsActivity.class);
 				startActivity(intent);
 			}
