@@ -33,7 +33,7 @@ public class MainActivity extends Activity {
 	private boolean expand_disabled;
 	private Button change_floatview;
 	private Button to_systemui;
-	// private Button change_leakicon;
+	private Button monkey_to_leakcanary;
 	private Button restart_launcher;
 	private Handler mHandler = new Handler(new Handler.Callback() {
 
@@ -186,23 +186,21 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		// change_leakicon = (Button) findViewById(R.id.change_leakicon);
-		// change_leakicon.setText(SPUtils.getValue(getApplicationContext(),
-		// SPUtils.SHOW_LEAKICON, true)
-		// ? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
-		// change_leakicon.setOnClickListener(new View.OnClickListener() {
-		//
-		// @Override
-		// public void onClick(View v) {
-		// // TODO Auto-generated method stub
-		// SPUtils.setValue(getApplicationContext(), SPUtils.SHOW_LEAKICON,
-		// !SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON,
-		// true));
-		// ((Button) v).setText(SPUtils.getValue(getApplicationContext(),
-		// SPUtils.SHOW_LEAKICON, true)
-		// ? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
-		// }
-		// });
+		monkey_to_leakcanary = (Button) findViewById(R.id.monkey_to_leakcanary);
+		monkey_to_leakcanary.setText(SPUtils.getValue(getApplicationContext(), SPUtils.MONKEY_TO_LEAKCANARY, false)
+				? "已允许Monkey启动LeakCanary" : "已禁止Monkey启动LeakCanary");
+		monkey_to_leakcanary.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				SPUtils.setValue(getApplicationContext(), SPUtils.MONKEY_TO_LEAKCANARY,
+						!SPUtils.getValue(getApplicationContext(), SPUtils.MONKEY_TO_LEAKCANARY, false));
+				((Button) v).setText(SPUtils.getValue(getApplicationContext(), SPUtils.MONKEY_TO_LEAKCANARY, false)
+						? "已允许Monkey启动LeakCanary" : "已禁止Monkey启动LeakCanary");
+				Toast.makeText(getApplicationContext(), "重启后才能生效！", Toast.LENGTH_SHORT).show();
+			}
+		});
 
 		restart_launcher = (Button) findViewById(R.id.restart_launcher);
 		restart_launcher.setOnClickListener(new View.OnClickListener() {
@@ -249,9 +247,9 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
+//		if (id == R.id.action_settings) {
+//			return true;
+//		}
 		return super.onOptionsItemSelected(item);
 	}
 

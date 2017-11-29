@@ -63,12 +63,12 @@ public class BlacklistActivity extends Activity {
 		case R.id.action_edit:
 			edit_blacklist();
 			break;
-		case R.id.action_reload:
-
-			break;
-		case R.id.action_share:
-
-			break;
+//		case R.id.action_reload:
+//
+//			break;
+//		case R.id.action_share:
+//
+//			break;
 
 		default:
 			break;

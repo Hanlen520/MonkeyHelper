@@ -1,5 +1,10 @@
 package com.shang.monkeyhelper;
 
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -79,10 +84,10 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 		final XSharedPreferences xSharedPreferences = new XSharedPreferences("com.shang.monkeyhelper", SPUtils.SPFILE);
 		xSharedPreferences.reload(); // 在包重新加载时会重新加载偏好设置，因此对于统一应用需要停止掉才能重新加载偏好设置（这是合理的）
 		/**
-		 * 禁止Activity启动
+		 * 禁止Activity启动——合并至Hook Monkey 启动 leakcanary中（不行）
 		 */
 		if (XposedHelpers.findClassIfExists("android.app.Instrumentation", lpparam.classLoader) == null) {
-			XposedBridge.log("android.app.Instrumentation cannot be found!");
+			// XposedBridge.log("android.app.Instrumentation cannot be found!");
 		} else {
 			// XposedBridge.log("android.app.Instrumentation is found!");
 			XposedHelpers.findAndHookMethod("android.app.Instrumentation", lpparam.classLoader, "execStartActivity",
@@ -91,21 +96,16 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 						@Override
 						protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
 							// TODO Auto-generated method stub
-							XposedBridge.log("execStartActivity() invoked!");
-							/*
-							 * if (param.args[4] != null) { // 不用去判断param存在与数组越界
-							 * Intent intent = (Intent) param.args[4]; String
-							 * activity_name =
-							 * intent.getComponent().getClassName();
-							 * XposedBridge.log("Find Activity: " +
-							 * activity_name); Set<String> set =
-							 * xSharedPreferences.getStringSet(SPUtils.
-							 * BLACKLIST, new HashSet<String>()); if
-							 * (set.contains(activity_name)) { // 暂时只考虑代码包名
-							 * XposedBridge.
-							 * log("This activity is in the blacklist!");
-							 * param.setResult(null); } }
-							 */
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							Intent intent = (Intent) param.args[4];
+							XposedBridge.log(intent.toString());
+							String activity_name = intent.getComponent().getClassName();
+							Set<String> set = xSharedPreferences.getStringSet(SPUtils.BLACKLIST, new HashSet<String>());
+							if (set.contains(activity_name)) { // 暂时只考虑代码包名
+								XposedBridge.log(activity_name + " is in the blacklist!");
+								param.setResult(null);
+							}
+
 							super.beforeHookedMethod(param);
 						}
 					});
@@ -120,16 +120,18 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 		} else {
 			// XposedBridge.log("com.shang.monkeyhelper.MainActivity is
 			// found!");
-			/*
-			 * XposedHelpers.findAndHookMethod(
-			 * "com.shang.monkeyhelper.MainActivity", lpparam.classLoader,
-			 * "special", Object.class, boolean.class, new XC_MethodHook() {
-			 * 
-			 * @Override protected void beforeHookedMethod(final MethodHookParam
-			 * param) throws Throwable { // TODO Auto-generated method stub
-			 * param.args[0] = lpparam; // 可以回传对象至应用空间
-			 * super.beforeHookedMethod(param); } });
-			 */
+
+			XposedHelpers.findAndHookMethod("com.shang.monkeyhelper.MainActivity", lpparam.classLoader, "special",
+					Object.class, boolean.class, new XC_MethodHook() {
+
+						@Override
+						protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							// param.args[0] = lpparam; // 可以回传对象至应用空间
+							super.beforeHookedMethod(param);
+						}
+					});
+
 		}
 
 		/**
@@ -183,56 +185,44 @@ public class Restriction implements IXposedHookZygoteInit, IXposedHookLoadPackag
 			}
 		}
 
+		Class<?> systemservicemanager_clazz = XposedHelpers.findClassIfExists("com.android.server.SystemServiceManager",
+				lpparam.classLoader);
+		XposedBridge.log(
+				systemservicemanager_clazz == null ? "systemservicemanager_clazz null" + " in " + lpparam.packageName
+						: "Find systemservicemanager_clazz: " + systemservicemanager_clazz.toString() + " in "
+								+ lpparam.packageName);
+		Class<?> systemserver_clazz = XposedHelpers.findClassIfExists("com.android.server.SystemServer",
+				lpparam.classLoader);
+		XposedBridge.log(systemserver_clazz == null ? "systemserver_clazz null" + " in " + lpparam.packageName
+				: "Find systemserver_clazz: " + systemserver_clazz.toString() + " in " + lpparam.packageName);
+
 		/**
-		 * hook leakcanary展示页面，禁用该Component会导致组件关联的进程无法启动！
+		 * Hook monkey 启动 leakcanary， 由于AMS只在开机时生成单例，所以在此使用黑名单需要重启才能生效
 		 */
-		if (XposedHelpers.findClassIfExists("com.squareup.leakcanary.LeakCanary", lpparam.classLoader) == null) {
-			// XposedBridge.log("com.squareup.leakcanary.LeakCanary cannot be
-			// found!");
-		} else {
-			// XposedBridge.log("com.squareup.leakcanary.LeakCanary is found!");
-			if (XposedHelpers.findMethodExactIfExists("com.squareup.leakcanary.LeakCanary", lpparam.classLoader,
-					"setEnabled", Context.class, Class.class, boolean.class) == null) {
-				// XposedBridge.log("setEnabled() not found!");
-			} else {
-				/*
-				 * XposedHelpers.findAndHookMethod(
-				 * "com.squareup.leakcanary.LeakCanary", lpparam.classLoader,
-				 * "setEnabled", Context.class, Class.class, boolean.class, new
-				 * XC_MethodHook() {
-				 * 
-				 * @Override protected void beforeHookedMethod(MethodHookParam
-				 * param) throws Throwable { // TODO Auto-generated method stub
-				 * XposedBridge.log("setEnabled() is invoked!"); param.args[2] =
-				 * xSharedPreferences.getBoolean(SPUtils.SHOW_LEAKICON, true);
-				 * super.beforeHookedMethod(param); } });
-				 */
-			}
-		}
-		if (XposedHelpers.findClassIfExists("com.squareup.leakcanary.internal.LeakCanaryInternals",
-				lpparam.classLoader) == null) {
-			// XposedBridge.log("com.squareup.leakcanary.internal.LeakCanaryInternals
-			// cannot be found!");
-		} else {
-			// XposedBridge.log("com.squareup.leakcanary.internal.LeakCanaryInternals
-			// is found!");
-			if (XposedHelpers.findMethodExactIfExists("com.squareup.leakcanary.internal.LeakCanaryInternals",
-					lpparam.classLoader, "setEnabled", Context.class, Class.class, boolean.class) == null) {
-				// XposedBridge.log("setEnabled() not found!");
-			} else {
-				/*
-				 * XposedHelpers.findAndHookMethod(
-				 * "com.squareup.leakcanary.internal.LeakCanaryInternals",
-				 * lpparam.classLoader, "setEnabled", Context.class,
-				 * Class.class, boolean.class, new XC_MethodHook() {
-				 * 
-				 * @Override protected void beforeHookedMethod(MethodHookParam
-				 * param) throws Throwable { // TODO Auto-generated method stub
-				 * XposedBridge.log("setEnabled() is invoked!"); param.args[2] =
-				 * xSharedPreferences.getBoolean(SPUtils.SHOW_LEAKICON, true);
-				 * super.beforeHookedMethod(param); } });
-				 */
-			}
+		Class<?> ams_clazz = XposedHelpers.findClassIfExists("com.android.server.am.ActivityManagerService",
+				lpparam.classLoader);
+		XposedBridge.log(ams_clazz == null ? "ams_clazz null" + " in " + lpparam.packageName
+				: "Find ams_clazz: " + ams_clazz.getName() + " in " + lpparam.packageName);
+		if (ams_clazz != null) {
+			XposedHelpers.findAndHookMethod(ams_clazz, "startActivity", Class.forName("android.app.IApplicationThread"),
+					String.class, Intent.class, String.class, IBinder.class, String.class, int.class, int.class,
+					Class.forName("android.app.ProfilerInfo"), Bundle.class, new XC_MethodHook() {
+						@Override
+						protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+							// TODO Auto-generated method stub
+							XposedBridge.log(param.thisObject + " " + param.method.getName() + " is invoked!");
+							Intent intent = (Intent) param.args[2];
+							XposedBridge.log("---In ams---" + intent.toString());
+							if (intent.getAction() != null && intent.getSourceBounds() == null && intent.getComponent()
+									.getClassName().equals("com.squareup.leakcanary.internal.DisplayLeakActivity")) { // Monkey的Intent来了
+								XposedBridge.log("Monkey Intent"); //
+								if (!xSharedPreferences.getBoolean(SPUtils.MONKEY_TO_LEAKCANARY, false)) { // 禁止跳转启用（默认也启用）
+									param.setResult(0);
+								}
+							}
+							super.beforeHookedMethod(param);
+						}
+					});
 		}
 
 		/**
