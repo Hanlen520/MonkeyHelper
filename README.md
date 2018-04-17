@@ -34,7 +34,7 @@ A tool to assist monkey testing
 
 <img src="https://github.com/waitshang/MonkeyHelper/blob/master/res/4.png" width="480" height="800" alt="图片加载失败时，显示这段字"/>
 
-1. **编辑Activity黑名单**
+2. **编辑Activity黑名单**
 
 在首页点击&quot;Activity 黑名单&quot;，即进入&quot;黑名单&quot;页，展示所有黑名单Activity，刚刚添加的Activity也在此，见图中红框处；
 
@@ -46,17 +46,17 @@ A tool to assist monkey testing
 
 添加至黑名单中的Activity如需要生效，就必须将Activity对应的应用重启，因为所做的修改仍在应用外部，重启应用将重新初始化一份虚拟机，新的虚拟机环境即是修改后的环境。
 
-1. **通知栏下拉禁用/启用**
+3. **通知栏下拉禁用/启用**
 
-1. 不重启手机的方式
+a. 不重启手机的方式
 
 点击&quot;通知栏已允许下拉&quot;即可禁用下拉，点击&quot;通知栏已禁止下拉&quot;即可允许下拉。
 
-1. 重启手机的方式、
+b. 重启手机的方式、
 
 点击&quot;Root方式启用/禁用通知栏&quot;即可启用或禁用通知栏（视通知栏状态而定），此种方式将彻底禁用通知栏、APP切换界面、音量调节界面，推荐使用此方式。
 
-1. **禁止自动进入Leak Trace页**
+4. **禁止自动进入Leak Trace页**
 
 该功能是为了防止发生内存泄漏时自动进入Leak Trace页，导致后续操作浪费在该页。同Activity黑名单功能，需要重启集成了LeakCanary的应用。
 
