@@ -42,6 +42,11 @@
 
         <service android:name=".FloatWindowService" >
         </service>
+
+        <activity
+            android:name=".LeakCanaryAppsActivity"
+            android:label="@string/title_activity_leak_canary_apps" >
+        </activity>
     </application>
 
 </manifest>

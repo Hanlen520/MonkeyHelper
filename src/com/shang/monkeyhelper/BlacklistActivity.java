@@ -9,6 +9,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -62,12 +63,12 @@ public class BlacklistActivity extends Activity {
 		case R.id.action_edit:
 			edit_blacklist();
 			break;
-		case R.id.action_reload:
-
-			break;
-		case R.id.action_share:
-
-			break;
+//		case R.id.action_reload:
+//
+//			break;
+//		case R.id.action_share:
+//
+//			break;
 
 		default:
 			break;
@@ -111,6 +112,7 @@ public class BlacklistActivity extends Activity {
 
 	private void replace_blacklist(List<String> inlist) {
 		blacklist.clear();
+		Log.i(BlacklistActivity.class.getName(), inlist.toString());
 		blacklist.addAll(inlist);
 	}
 

@@ -9,7 +9,11 @@ import android.app.ActivityManager.RunningServiceInfo;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,14 +33,22 @@ public class MainActivity extends Activity {
 	private boolean expand_disabled;
 	private Button change_floatview;
 	private Button to_systemui;
-	private Button change_leakicon;
+	private Button monkey_to_leakcanary;
+	private Button restart_launcher;
+	private Handler mHandler = new Handler(new Handler.Callback() {
+
+		@Override
+		public boolean handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+	});
+	private Button to_leaks;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		expand_disabled = SPUtils.getValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, false);
-		Toast.makeText(getApplicationContext(), expand_disabled ? "通知栏已禁用" : "通知栏未禁用", Toast.LENGTH_SHORT).show();
 		to_blacklist = (Button) findViewById(R.id.to_blacklist);
 		to_blacklist.setOnClickListener(new View.OnClickListener() {
 
@@ -49,20 +61,31 @@ public class MainActivity extends Activity {
 
 		});
 
+		expand_disabled = SPUtils.getValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, false);
 		to_statusbar = (Button) findViewById(R.id.to_statusbar);
-		to_statusbar.setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
-		to_statusbar.setOnClickListener(new View.OnClickListener() {
+		if (isSystemUIEabled()) {
+			Toast.makeText(getApplicationContext(), expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉", Toast.LENGTH_SHORT)
+					.show();
+			to_statusbar.setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
+			to_statusbar.setOnClickListener(new View.OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				SPUtils.setValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, !expand_disabled);
-				expand_disabled = SPUtils.getValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, expand_disabled);
-				Toast.makeText(getApplicationContext(), expand_disabled ? "通知栏已禁用" : "通知栏未禁用", Toast.LENGTH_SHORT)
-						.show();
-				((Button) v).setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
-			}
-		});
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					SPUtils.setValue(getApplicationContext(), SPUtils.EXPAND_DISABLED, !expand_disabled);
+					expand_disabled = SPUtils.getValue(getApplicationContext(), SPUtils.EXPAND_DISABLED,
+							expand_disabled);
+					Toast.makeText(getApplicationContext(), expand_disabled ? "通知栏已禁用" : "通知栏未禁用", Toast.LENGTH_SHORT)
+							.show();
+					((Button) v).setText(expand_disabled ? "通知栏已禁止下拉" : "通知栏已允许下拉");
+				}
+			});
+		} else {
+			Toast.makeText(getApplicationContext(), "通知栏已禁止下拉", Toast.LENGTH_SHORT).show();
+			to_statusbar.setText("通知栏已禁止下拉");
+			to_statusbar.setClickable(false);
+			to_statusbar.setTextColor(Color.GRAY);
+		}
 
 		change_floatview = (Button) findViewById(R.id.change_floatview);
 		change_floatview.setText(isServiceRunning(FloatWindowService.class.getName()) ? "悬浮按钮已开启" : "悬浮按钮已关闭");
@@ -163,18 +186,52 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		change_leakicon = (Button) findViewById(R.id.change_leakicon);
-		change_leakicon.setText(SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true)
-				? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
-		change_leakicon.setOnClickListener(new View.OnClickListener() {
+		monkey_to_leakcanary = (Button) findViewById(R.id.monkey_to_leakcanary);
+		monkey_to_leakcanary.setText(SPUtils.getValue(getApplicationContext(), SPUtils.MONKEY_TO_LEAKCANARY, false)
+				? "已允许Monkey启动LeakCanary" : "已禁止Monkey启动LeakCanary");
+		monkey_to_leakcanary.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				SPUtils.setValue(getApplicationContext(), SPUtils.SHOW_LEAKICON,
-						!SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true));
-				((Button) v).setText(SPUtils.getValue(getApplicationContext(), SPUtils.SHOW_LEAKICON, true)
-						? "Leak Trace自动展示已开启" : "Leak Trace已禁止展示");
+				SPUtils.setValue(getApplicationContext(), SPUtils.MONKEY_TO_LEAKCANARY,
+						!SPUtils.getValue(getApplicationContext(), SPUtils.MONKEY_TO_LEAKCANARY, false));
+				((Button) v).setText(SPUtils.getValue(getApplicationContext(), SPUtils.MONKEY_TO_LEAKCANARY, false)
+						? "已允许Monkey启动LeakCanary" : "已禁止Monkey启动LeakCanary");
+				Toast.makeText(getApplicationContext(), "重启后才能生效！", Toast.LENGTH_SHORT).show();
+			}
+		});
+
+		restart_launcher = (Button) findViewById(R.id.restart_launcher);
+		restart_launcher.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				String launcher_name = getLauncherPackageName();
+				if (launcher_name.length() == 0) {
+					Toast.makeText(getApplicationContext(), "无法获取当前系统的Launcher名", Toast.LENGTH_SHORT).show();
+				} else {
+					Log.i(MainActivity.class.getName(),
+							ShellUtils.execCmd("su", "-c", "am force-stop " + launcher_name));
+					/*
+					 * if (!isServiceRunning(launcher_name)) { // 启动Launcher
+					 * Log.i(MainActivity.class.getName(),
+					 * ShellUtils.execCmd("sh", "-c", "am start -n " +
+					 * launcher_name + "/" + getLauncherActivityName())); }
+					 */
+				}
+			}
+		});
+
+		to_leaks = (Button) findViewById(R.id.to_leaks);
+		to_leaks.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(MainActivity.this, LeakCanaryAppsActivity.class);
+				startActivity(intent);
 			}
 		});
 	}
@@ -190,9 +247,9 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
+//		if (id == R.id.action_settings) {
+//			return true;
+//		}
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -281,9 +338,50 @@ public class MainActivity extends Activity {
 	 * @param processName
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private boolean isProcessRunning(String processName) {
 		String result = ShellUtils.execCmd("sh", "-c", "ps |grep " + processName);
 		return result.contains(processName);
 	}
 
+	/**
+	 * 获取当前系统的Launcher包名
+	 * 
+	 * @return
+	 */
+	private String getLauncherPackageName() {
+		final Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.addCategory(Intent.CATEGORY_HOME);
+		final ResolveInfo res = this.getPackageManager().resolveActivity(intent, 0);
+		if (res.activityInfo == null) {
+			return "";
+		}
+		if (res.activityInfo.packageName.equals("android")) {
+			// 有多个桌面程序存在，且未指定默认项时；
+			return "";
+		} else {
+			return res.activityInfo.packageName;
+		}
+	}
+
+	/**
+	 * 获取当前系统的Launcher Activity名
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	private String getLauncherActivityName() {
+		final Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.addCategory(Intent.CATEGORY_HOME);
+		final ResolveInfo res = this.getPackageManager().resolveActivity(intent, 0);
+		if (res.activityInfo == null) {
+			return "";
+		}
+		if (res.activityInfo.packageName.equals("android")) {
+			// 有多个桌面程序存在，且未指定默认项时；
+			return "";
+		} else {
+			return res.activityInfo.name;
+		}
+	}
 }

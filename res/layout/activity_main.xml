@@ -58,10 +58,32 @@
             android:layout_height="@dimen/activity_vertical_margin" />
 
         <Button
-            android:id="@+id/change_leakicon"
+            android:id="@+id/monkey_to_leakcanary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Leak Trace自动展示已开启"
+            android:text="已禁止Monkey启动LeakCanary"
+            android:textAllCaps="false" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/activity_vertical_margin" />
+
+        <Button
+            android:id="@+id/to_leaks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="查看 Leak Trace"
+            android:textAllCaps="false" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/activity_vertical_margin" />
+        
+        <Button
+            android:id="@+id/restart_launcher"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="重启 Launcher"
             android:textAllCaps="false" />
 
         <View

@@ -8,5 +8,7 @@
     <string name="title_activity_blacklist">黑名单</string>
     <string name="to_blacklist">Activity 黑名单</string>
     <string name="action_settings">设置</string>
+    <string name="title_activity_leak_canary_apps">应用列表</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>
